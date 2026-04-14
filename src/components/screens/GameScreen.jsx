@@ -178,8 +178,10 @@ const GameScreen = ({
 
           {/* History Strip - Horizontal Scroll */}
           <div className="flex justify-center">
-            <div className="glass-panel rounded-2xl border border-white/5 px-3 py-2 w-[720px] overflow-x-auto">
-              <HandHistory history={state.history} />
+            <div className="glass-panel rounded-2xl border border-white/5 px-3 py-2 w-fit max-w-full mx-auto overflow-x-auto">
+              <div className="w-fit max-w-full mx-auto">
+                <HandHistory history={state.history} />
+              </div>
             </div>
           </div>
         </div>
