@@ -41,7 +41,7 @@ const getTileBorderColor = (tile) => {
  * Tile Card Component - Displays a single mahjong tile with Material Icon and value
  * Supports both large (in-hand) and small (history) versions
  */
-const TileCard = ({ tile, small = false, isResult = false, result = null }) => {
+const TileCard = ({ tile, small = false }) => {
   const icon = getTileIcon(tile)
   const iconColor = getTileColor(tile)
   const borderColor = getTileBorderColor(tile)
@@ -56,9 +56,9 @@ const TileCard = ({ tile, small = false, isResult = false, result = null }) => {
         transition={{ duration: ANIMATION_TIMING.TILE_FLIP }}
         whileHover={{ y: -8 }}
       >
-        {/* Tile label */}
+        {/* Tile label - show specific name (Red Dragon, East Wind, etc.) */}
         <span className="self-start text-[10px] font-headline font-bold uppercase tracking-wider text-on-surface/60">
-          {tile.type === 'dragon' ? 'Dragon' : tile.type === 'wind' ? 'Wind' : tile.suit}
+          {tile.name}
         </span>
 
         {/* Material Icon display */}

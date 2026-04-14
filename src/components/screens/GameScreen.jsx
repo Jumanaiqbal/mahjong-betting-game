@@ -162,7 +162,7 @@ const GameScreen = ({
               >
                 <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 <span className="material-symbols-outlined text-on-primary text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>expand_less</span>
-                <span className="text-on-primary font-headline font-bold text-xs uppercase tracking-widest relative z-10">Higher</span>
+                <span className="text-on-primary font-headline font-bold text-xs uppercase tracking-widest relative z-10">Bet Higher</span>
               </button>
               
               <button
@@ -171,14 +171,16 @@ const GameScreen = ({
                 className="flex-1 h-12 bg-surface-container-highest rounded-lg border border-outline-variant/10 flex items-center justify-center gap-1 group transition-all active:scale-95 hover:bg-surface-variant hover:border-outline-variant/30 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span className="material-symbols-outlined text-on-surface/60 text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>expand_more</span>
-                <span className="text-on-surface font-headline font-bold text-xs uppercase tracking-widest">Lower</span>
+                <span className="text-on-surface font-headline font-bold text-xs uppercase tracking-widest">Bet Lower</span>
               </button>
             </div>
           </div>
 
           {/* History Strip - Horizontal Scroll */}
-          <div className="glass-panel p-3 rounded-2xl border border-white/5 w-full flex-shrink-0">
-            <HandHistory history={state.history} />
+          <div className="flex justify-center">
+            <div className="glass-panel rounded-2xl border border-white/5 px-3 py-2 w-[720px] overflow-x-auto">
+              <HandHistory history={state.history} />
+            </div>
           </div>
         </div>
       </main>

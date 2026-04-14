@@ -5,7 +5,6 @@ import {
   discardHand, 
   reshuffle, 
   needsReshuffle,
-  updateTileValues,
   checkTileGameOver 
 } from '../lib/deck'
 import { 
@@ -31,28 +30,33 @@ const initialState = {
   lastResult: null,
   leaderboard: getLeaderboard(),
   playerName: '',
+  tileValueMap: {}, // tiles: id -> value mapping
 }
 
 const useGameState = () => {
   const [state, setState] = useState(initialState)
 
-  // ─── START GAME ────────────────────────────────────
   const startGame = (playerName) => {
     const deck = createDeck()
     const { drawnTiles, remaining } = drawTiles(deck, 3)
+    
+    // Map tile IDs to their values (for tracking dragon/wind changes)
+    const tileValueMap = Object.fromEntries(
+      deck.map(tile => [tile.id, tile.value])
+    )
 
     setState({
       ...initialState,
       screen: 'playing',
       playerName: playerName,
-      drawPile: remaining,      // 31 tiles
-      currentHand: drawnTiles,  // 3 tiles
-      discardPile: [],          // empty
+      drawPile: remaining,
+      currentHand: drawnTiles,
+      discardPile: [],
+      tileValueMap: tileValueMap,
       leaderboard: getLeaderboard(),
     })
   }
 
-  // ─── PLACE BET ─────────────────────────────────────
   const placeBet = (bet) => {
     const { 
       drawPile, 
@@ -62,54 +66,52 @@ const useGameState = () => {
       roundsPlayed,
       reshuffleCount,
       streak,
-      history 
+      history,
+      tileValueMap
     } = state
 
-    // 1. draw new hand
+    // Draw new hand
     const { drawnTiles: newHand, remaining } = drawTiles(drawPile, 3)
 
-    // 2. calculate totals
+    // Calculate hand totals
     const currentTotal = calculateHandTotal(currentHand)
     const newTotal = calculateHandTotal(newHand)
 
-    // 3. check result
+    // Check bet result
     const isTie = checkTie(currentTotal, newTotal)
     const playerWon = isTie ? false : checkBetResult(bet, currentTotal, newTotal)
     const lastResult = isTie ? 'tie' : playerWon ? 'win' : 'lose'
 
-    // 4. calculate new score
+    // Calculate score
     const points = calculatePoints(playerWon, newHand)
     const newScore = score + points
 
-    // 5. update streak
+    // Update streak
     const newStreak = playerWon ? streak + 1 : 0
 
-    // 6. update tile values globally by ID
-    // Build a map of tile IDs that changed and their new values
-    const tileUpdates = {}
+    // Update tile values
+    const newTileValueMap = { ...tileValueMap }
     currentHand.forEach(tile => {
       if (tile.type !== 'number') {
         const newValue = playerWon ? tile.value + 1 : tile.value - 1
-        tileUpdates[tile.id] = newValue
+        newTileValueMap[tile.id] = newValue
       }
     })
 
-    // Helper function to apply updates to any tile array
-    const applyTileUpdates = (tiles) => {
-      return tiles.map(tile => {
-        if (tile.id in tileUpdates) {
-          return { ...tile, value: tileUpdates[tile.id] }
-        }
-        return tile
-      })
-    }
+    // Helper: apply tileValueMap values to tiles
+    const applyTileValues = (tiles) => 
+      tiles.map(tile => 
+        tile.type !== 'number' && tile.id in newTileValueMap 
+          ? { ...tile, value: newTileValueMap[tile.id] }
+          : tile
+      )
 
-    // 7. apply updates to all tile collections
-    const updatedNewHand = applyTileUpdates([...newHand])
-    const updatedDrawPile = applyTileUpdates(remaining)
-    const updatedDiscardPile = applyTileUpdates(discardHand(discardPile, currentHand))
+    // Apply updates to collections
+    const updatedNewHand = applyTileValues(newHand)
+    const updatedDrawPile = applyTileValues(remaining)
+    const updatedDiscardPile = applyTileValues(discardHand(discardPile, currentHand))
 
-    // 8. check reshuffle
+    // Check reshuffle needed
     let finalDrawPile = updatedDrawPile
     let finalDiscardPile = updatedDiscardPile
     let newReshuffleCount = reshuffleCount
@@ -120,22 +122,22 @@ const useGameState = () => {
       newReshuffleCount = reshuffleCount + 1
     }
 
-    // 9. add current hand to history
+    // Add to history
     const newHistory = [
       ...history,
       { tiles: currentHand, value: currentTotal, result: lastResult }
     ]
 
-    // 10. check game over
+    // Check game over
     const tileGameOver = checkTileGameOver([...finalDrawPile, ...updatedNewHand])
     const deckGameOver = newReshuffleCount >= 3
     const isGameOver = tileGameOver || deckGameOver
 
-    // 11. update state!
+    // Update state
     setState(prev => ({
       ...prev,
       drawPile: finalDrawPile,
-      discardPile: finalDiscardPile,         // ← use this now!
+      discardPile: finalDiscardPile,
       currentHand: updatedNewHand,
       score: newScore,
       roundsPlayed: roundsPlayed + 1,
@@ -144,10 +146,10 @@ const useGameState = () => {
       history: newHistory,
       lastResult: lastResult,
       screen: isGameOver ? 'gameover' : 'playing',
+      tileValueMap: newTileValueMap,
     }))
   }
 
-  // ─── SAVE SCORE ────────────────────────────────────
   const saveScore = () => {
     const { playerName, score, roundsPlayed, streak } = state
     const finalScore = calculateFinalScore(score, roundsPlayed, streak)
@@ -160,12 +162,10 @@ const useGameState = () => {
     }))
   }
 
-  // ─── EXIT ──────────────────────────────────────────
   const exitGame = () => {
     setState(prev => ({ ...prev, screen: 'landing' }))
   }
 
-  // ─── RETURN ────────────────────────────────────────
   return {
     state,
     startGame,
