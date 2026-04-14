@@ -84,42 +84,59 @@ const useGameState = () => {
     // 5. update streak
     const newStreak = playerWon ? streak + 1 : 0
 
-    // 6. update tile values in remaining draw pile + discard
-    const updatedDraw = updateTileValues(remaining, newHand, playerWon)
-    const updatedDiscard = updateTileValues(
-      discardHand(discardPile, currentHand),  // old hand → discard
-      newHand,
-      playerWon
-    )
+    // 6. update tile values globally by ID
+    // Build a map of tile IDs that changed and their new values
+    const tileUpdates = {}
+    currentHand.forEach(tile => {
+      if (tile.type !== 'number') {
+        const newValue = playerWon ? tile.value + 1 : tile.value - 1
+        tileUpdates[tile.id] = newValue
+      }
+    })
 
-    // 7. check reshuffle
-    let finalDrawPile = updatedDraw
-    let finalDiscardPile = updatedDiscard   // ← track discard separately
+    // Helper function to apply updates to any tile array
+    const applyTileUpdates = (tiles) => {
+      return tiles.map(tile => {
+        if (tile.id in tileUpdates) {
+          return { ...tile, value: tileUpdates[tile.id] }
+        }
+        return tile
+      })
+    }
+
+    // 7. apply updates to all tile collections
+    const updatedNewHand = applyTileUpdates([...newHand])
+    const updatedDrawPile = applyTileUpdates(remaining)
+    const updatedDiscardPile = applyTileUpdates(discardHand(discardPile, currentHand))
+
+    // 8. check reshuffle
+    let finalDrawPile = updatedDrawPile
+    let finalDiscardPile = updatedDiscardPile
     let newReshuffleCount = reshuffleCount
 
-    if (needsReshuffle(updatedDraw)) {
-      finalDrawPile = reshuffle(updatedDiscard)  // discard → draw pile
-      finalDiscardPile = []                       // ← clear discard!
+    if (needsReshuffle(updatedDrawPile)) {
+      finalDrawPile = reshuffle(updatedDiscardPile)
+      finalDiscardPile = []
       newReshuffleCount = reshuffleCount + 1
     }
 
-    // 8. add current hand to history
+    // 9. add current hand to history
     const newHistory = [
       ...history,
       { tiles: currentHand, value: currentTotal, result: lastResult }
     ]
 
-    // 9. check game over
-    const tileGameOver = checkTileGameOver([...finalDrawPile, ...newHand])
+    // 10. check game over
+    const tileGameOver = checkTileGameOver([...finalDrawPile, ...updatedNewHand])
     const deckGameOver = newReshuffleCount >= 3
     const isGameOver = tileGameOver || deckGameOver
 
-    // 10. update state!
+    // 11. update state!
     setState(prev => ({
       ...prev,
       drawPile: finalDrawPile,
       discardPile: finalDiscardPile,         // ← use this now!
-      currentHand: newHand,
+      currentHand: updatedNewHand,
       score: newScore,
       roundsPlayed: roundsPlayed + 1,
       reshuffleCount: newReshuffleCount,
