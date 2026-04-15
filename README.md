@@ -17,13 +17,17 @@ npm install
 npm run dev
 ```
 
-App runs at the Vite local URL shown in terminal (usually `http://localhost:5173`).
-
 ### Build
 
 ```bash
 npm run build
 npm run preview
+```
+
+### Tests
+
+```bash
+npm test
 ```
 
 ## Implemented Assessment Requirements
@@ -52,27 +56,13 @@ npm run preview
   - Any tracked tile value reaches 0 or 10, or
   - Draw pile reshuffles for the 3rd time.
 
-### Gameplay Interface
 
-- Exit button returns to landing page.
-- Betting actions: Bet Higher / Bet Lower.
-- Current hand tile visuals + hand total.
-- History view of previous hands in compact form.
-- End screen shows final score and summary stats.
 
-## Architecture Notes (Extension-Ready)
 
-- `src/hooks/useGameState.js`: central game state and flow orchestration.
-- `src/lib/tiles.js`: tile definitions and deck creation.
-- `src/lib/deck.js`: draw/discard/reshuffle mechanics.
-- `src/lib/scoring.js`: hand totals, bet resolution, scoring, leaderboard.
-- Screen components are separated by flow state (`landing`, `playing`, `gameover`).
-
-This separation is designed so new rules/features can be added without rewriting UI flow.
 
 ## AI Usage Disclosure
 
-### Handwritten / Owned by Developer
+### Handwritten 
 
 - Game rules implementation and state transitions.
 - App structure, component decomposition, and integration.
