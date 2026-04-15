@@ -6,7 +6,6 @@ export const STARTING_VALUE = 5
 export const MAX_TILE_VALUE = 10
 export const MIN_TILE_VALUE = 0
 export const LEADERBOARD_SIZE = 5
-export const STREAK_BONUS = 10
 export const ROUND_BONUS = 2
 
 // Color constants for tile categories

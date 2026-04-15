@@ -25,7 +25,6 @@ const initialState = {
   score: 0,
   roundsPlayed: 0,
   reshuffleCount: 0,
-  streak: 0,
   history: [],
   lastResult: null,
   leaderboard: getLeaderboard(),
@@ -65,7 +64,6 @@ const useGameState = () => {
       score, 
       roundsPlayed,
       reshuffleCount,
-      streak,
       history,
       tileValueMap
     } = state
@@ -85,9 +83,6 @@ const useGameState = () => {
     // Calculate score
     const points = calculatePoints(playerWon, newHand)
     const newScore = score + points
-
-    // Update streak
-    const newStreak = playerWon ? streak + 1 : 0
 
     // Update tile values
     const newTileValueMap = { ...tileValueMap }
@@ -142,7 +137,6 @@ const useGameState = () => {
       score: newScore,
       roundsPlayed: roundsPlayed + 1,
       reshuffleCount: newReshuffleCount,
-      streak: newStreak,
       history: newHistory,
       lastResult: lastResult,
       screen: isGameOver ? 'gameover' : 'playing',
@@ -151,8 +145,8 @@ const useGameState = () => {
   }
 
   const saveScore = () => {
-    const { playerName, score, roundsPlayed, streak } = state
-    const finalScore = calculateFinalScore(score, roundsPlayed, streak)
+    const { playerName, score, roundsPlayed } = state
+    const finalScore = calculateFinalScore(score, roundsPlayed)
     const newLeaderboard = saveToLeaderboard(playerName, finalScore)
 
     setState(prev => ({

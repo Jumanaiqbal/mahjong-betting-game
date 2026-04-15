@@ -46,7 +46,7 @@ Predict whether the next hand total will be **higher** or **lower** than the cur
 ### Leaderboard
 - Top 5 scores stored using localStorage
 - Automatically updated after each game
-- Final score formula: `Base Score + (Streak × 10) + (Rounds × 2)`
+- Final score formula: `Base Score + (Rounds × 2)`
 
 ---
 
@@ -82,8 +82,6 @@ Screen navigation
 Deck state
 
 Scoring system
-
-Streak tracking
 
 History management
 

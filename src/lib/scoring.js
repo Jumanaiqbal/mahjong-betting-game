@@ -19,11 +19,10 @@ export const calculatePoints = (playerWon, newHand) => {
 }
 
 // Calculate final score (end of game)
-export const calculateFinalScore = (score, roundsPlayed, streak) => {
-  const streakBonus = streak * 10     // bonus for consecutive wins
+export const calculateFinalScore = (score, roundsPlayed) => {
   const roundBonus = roundsPlayed * 2 // bonus for surviving longer
 
-  return score + streakBonus + roundBonus
+  return score + roundBonus
 }
 
 // Check if its a tie (neither higher nor lower)

@@ -101,18 +101,6 @@ const GameOverScreen = ({ state, onSave, onExit }) => {
               </div>
 
               <div>
-                <p className="font-body text-sm text-on-surface-variant mb-2 uppercase tracking-widest">Best Streak</p>
-                <motion.p
-                  className="font-headline text-4xl font-bold text-secondary"
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ duration: 0.3, delay: 0.2 }}
-                >
-                  {state.streak}🔥
-                </motion.p>
-              </div>
-
-              <div>
                 <p className="font-body text-sm text-on-surface-variant mb-2 uppercase tracking-widest">Reshuffles Used</p>
                 <motion.p
                   className="font-headline text-4xl font-bold text-tertiary"
