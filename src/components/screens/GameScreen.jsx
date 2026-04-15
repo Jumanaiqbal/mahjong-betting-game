@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import { useState } from 'react'
 import TileCard from '../game/TileCard'
 import HandHistory from '../game/HandHistory'
-import BetButtons from '../game/BetButtons'
 import { calculateHandTotal } from '../../lib/scoring'
 
 /**
@@ -24,7 +23,6 @@ const GameScreen = ({
   }
 
   const currentTotal = calculateHandTotal(state.currentHand)
-  const targetTotal = state.previousHand ? calculateHandTotal(state.previousHand) : 0
 
   return (
     <motion.div
@@ -63,7 +61,6 @@ const GameScreen = ({
                 <p className="text-on-surface-variant text-[8px] uppercase tracking-[0.15em] mb-0.5">Draw Pile</p>
                 <h3 className="text-lg font-headline font-bold flex items-center gap-2">
                   {state.drawPile.length}
-                  <span className="text-xs font-normal opacity-40">/ 34</span>
                 </h3>
               </div>
               <div className="w-10 h-12 bg-surface-container-highest rounded border border-outline-variant/30 flex items-center justify-center opacity-40">

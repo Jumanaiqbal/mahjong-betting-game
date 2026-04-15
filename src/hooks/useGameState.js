@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { createDeck } from '../lib/tiles'
+import { HAND_SIZE, MAX_RESHUFFLE, MIN_TILE_VALUE, MAX_TILE_VALUE } from '../constants/game'
 import { 
   drawTiles, 
   discardHand, 
   reshuffle, 
-  needsReshuffle,
-  checkTileGameOver 
+  needsReshuffle
 } from '../lib/deck'
 import { 
   calculateHandTotal,
@@ -29,7 +29,7 @@ const initialState = {
   lastResult: null,
   leaderboard: getLeaderboard(),
   playerName: '',
-  tileValueMap: {}, // tiles: id -> value mapping
+  tileValueMap: {},
 }
 
 const useGameState = () => {
@@ -37,9 +37,8 @@ const useGameState = () => {
 
   const startGame = (playerName) => {
     const deck = createDeck()
-    const { drawnTiles, remaining } = drawTiles(deck, 3)
+    const { drawnTiles, remaining } = drawTiles(deck, HAND_SIZE)
     
-    // Map tile IDs to their values (for tracking dragon/wind changes)
     const tileValueMap = Object.fromEntries(
       deck.map(tile => [tile.id, tile.value])
     )
@@ -68,32 +67,47 @@ const useGameState = () => {
       tileValueMap
     } = state
 
-    // Draw new hand
-    const { drawnTiles: newHand, remaining } = drawTiles(drawPile, 3)
+    // Ensure hand stays full even if pile empties mid-draw.
+    let workingDrawPile = [...drawPile]
+    let workingDiscardPile = [...discardPile]
+    let newReshuffleCount = reshuffleCount
+    const newHand = []
 
-    // Calculate hand totals
+    while (newHand.length < HAND_SIZE) {
+      const missingTiles = HAND_SIZE - newHand.length
+      const { drawnTiles, remaining } = drawTiles(workingDrawPile, missingTiles)
+      newHand.push(...drawnTiles)
+      workingDrawPile = remaining
+
+      if (newHand.length < HAND_SIZE) {
+        if (!needsReshuffle(workingDrawPile)) {
+          break
+        }
+
+        workingDrawPile = reshuffle(workingDiscardPile)
+        workingDiscardPile = []
+        newReshuffleCount += 1
+      }
+    }
+
     const currentTotal = calculateHandTotal(currentHand)
     const newTotal = calculateHandTotal(newHand)
 
-    // Check bet result
     const isTie = checkTie(currentTotal, newTotal)
     const playerWon = isTie ? false : checkBetResult(bet, currentTotal, newTotal)
     const lastResult = isTie ? 'tie' : playerWon ? 'win' : 'lose'
 
-    // Calculate score
     const points = calculatePoints(playerWon, newHand)
     const newScore = score + points
 
-    // Update tile values
     const newTileValueMap = { ...tileValueMap }
     currentHand.forEach(tile => {
-      if (tile.type !== 'number') {
+      if (tile.type !== 'number' && !isTie) {
         const newValue = playerWon ? tile.value + 1 : tile.value - 1
         newTileValueMap[tile.id] = newValue
       }
     })
 
-    // Helper: apply tileValueMap values to tiles
     const applyTileValues = (tiles) => 
       tiles.map(tile => 
         tile.type !== 'number' && tile.id in newTileValueMap 
@@ -101,34 +115,30 @@ const useGameState = () => {
           : tile
       )
 
-    // Apply updates to collections
     const updatedNewHand = applyTileValues(newHand)
-    const updatedDrawPile = applyTileValues(remaining)
-    const updatedDiscardPile = applyTileValues(discardHand(discardPile, currentHand))
+    const updatedDrawPile = applyTileValues(workingDrawPile)
+    const updatedDiscardPile = applyTileValues(discardHand(workingDiscardPile, currentHand))
 
-    // Check reshuffle needed
     let finalDrawPile = updatedDrawPile
     let finalDiscardPile = updatedDiscardPile
-    let newReshuffleCount = reshuffleCount
 
     if (needsReshuffle(updatedDrawPile)) {
       finalDrawPile = reshuffle(updatedDiscardPile)
       finalDiscardPile = []
-      newReshuffleCount = reshuffleCount + 1
+      newReshuffleCount += 1
     }
 
-    // Add to history
     const newHistory = [
       ...history,
       { tiles: currentHand, value: currentTotal, result: lastResult }
     ]
 
-    // Check game over
-    const tileGameOver = checkTileGameOver([...finalDrawPile, ...updatedNewHand])
-    const deckGameOver = newReshuffleCount >= 3
+    const tileGameOver = Object.values(newTileValueMap).some(
+      (value) => value <= MIN_TILE_VALUE || value >= MAX_TILE_VALUE
+    )
+    const deckGameOver = newReshuffleCount >= MAX_RESHUFFLE
     const isGameOver = tileGameOver || deckGameOver
 
-    // Update state
     setState(prev => ({
       ...prev,
       drawPile: finalDrawPile,

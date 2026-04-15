@@ -1,230 +1,87 @@
 # Mahjong Hand Betting Game
 
-A modern, interactive web-based betting game using Mahjong tiles with dynamic value scaling, real-time scoring, and a responsive Material Design-inspired UI built with React and Vite.
+Web-based Mahjong betting game built with React + Vite for the technical assessment.
 
-[![React](https://img.shields.io/badge/React-19-61dafb)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-5-646cff)](https://vitejs.dev/)
-[![Tailwind](https://img.shields.io/badge/Tailwind-3-38bdf8)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+## Tech Stack
 
----
+- React 19
+- Vite
+- Tailwind CSS
+- Framer Motion
+- localStorage (leaderboard persistence)
 
-## Overview
-
-Play and compete by betting on consecutive hands while managing dynamic tile values and tracking performance through a leaderboard system.
-
----
-
-## Game Rules
-
-### Objective
-Predict whether the next hand total will be **higher** or **lower** than the current hand.
-
-### Scoring
-- Correct prediction: earn hand value as points
-- Incorrect prediction: earn zero points
-
-### Game Over Conditions
-- Any tile value reaches 0 or 10
-- OR three deck reshuffles are completed
-
-### Tile System
-
-**Total Tiles:** 34 Unique Tiles
-
-**Number Tiles (27)**
-- Bamboo, Characters, and Dots (1-9)
-- Fixed value equal to face value (unchanged throughout gameplay)
-
-**Honor Tiles (7)**
-- Dragons: Red, Green, White (initial value 5)
-- Winds: East, West, North, South (initial value 5)
-- Value changes dynamically:
-  - Win: +1
-  - Loss: -1
-
-### Leaderboard
-- Top 5 scores stored using localStorage
-- Automatically updated after each game
-- Final score formula: `Base Score + (Rounds × 2)`
-
----
-
-## Quick Start
-
-### Prerequisites
-- Node.js 16 or higher
-- npm
-
-### Installation
+## Setup
 
 ```bash
-git clone https://github.com/yourusername/mahjong-betting-game.git
-cd mahjong-betting-game
 npm install
-Development
-bash
 npm run dev
-Application runs at: http://localhost:5175
+```
 
-Production Build
-bash
+App runs at the Vite local URL shown in terminal (usually `http://localhost:5173`).
+
+### Build
+
+```bash
 npm run build
-Preview Build
-bash
 npm run preview
-Architecture
-State Management
-Centralized using useGameState:
+```
 
-Screen navigation
+## Implemented Assessment Requirements
 
-Deck state
+### Landing Page
 
-Scoring system
+- New game entry with player name input.
+- Top 5 leaderboard displayed from localStorage.
 
-History management
+### Game Mechanics
 
-Reshuffle logic
+- Uses Mahjong tile categories: number tiles, dragons, winds.
+- Number tiles use fixed face values.
+- Dragons/winds start at 5 and scale after each round:
+  - Win: +1
+  - Loss: -1
+- Draw pile and discard pile counts are visible during gameplay.
+- Reshuffle behavior:
+  - Triggered when draw pile is empty.
+  - A fresh full deck is added, combined with discard pile, then shuffled.
+- Deck count note:
+  - A single Mahjong deck is 34 unique tiles in this project.
+  - Because each reshuffle adds a fresh deck before shuffling, draw pile counts can exceed 34 (for example, 67 = 33 discard + 34 fresh deck).
+  - This is intentional and follows the assessment requirement text.
+- Game over triggers when:
+  - Any tracked tile value reaches 0 or 10, or
+  - Draw pile reshuffles for the 3rd time.
 
-Leaderboard updates
+### Gameplay Interface
 
-Core Modules
-tiles.js
+- Exit button returns to landing page.
+- Betting actions: Bet Higher / Bet Lower.
+- Current hand tile visuals + hand total.
+- History view of previous hands in compact form.
+- End screen shows final score and summary stats.
 
-Defines all 34 Mahjong tiles and their initial values
+## Architecture Notes (Extension-Ready)
 
-deck.js
+- `src/hooks/useGameState.js`: central game state and flow orchestration.
+- `src/lib/tiles.js`: tile definitions and deck creation.
+- `src/lib/deck.js`: draw/discard/reshuffle mechanics.
+- `src/lib/scoring.js`: hand totals, bet resolution, scoring, leaderboard.
+- Screen components are separated by flow state (`landing`, `playing`, `gameover`).
 
-Deck creation and shuffling
+This separation is designed so new rules/features can be added without rewriting UI flow.
 
-Tile drawing logic
+## AI Usage Disclosure
 
-Value updates
+### Handwritten / Owned by Developer
 
-Reshuffle system
+- Game rules implementation and state transitions.
+- App structure, component decomposition, and integration.
+- Final validation and requirement alignment decisions.
 
-Game over detection
+### AI-Assisted
 
-scoring.js
+- Iterative UI polishing ideas (layout/motion tweaks).
+- Refactoring suggestions for readability.
+- Debugging assistance for edge-case checks.
 
-Hand comparison logic
-
-Win/loss evaluation
-
-Score calculation
-
-Leaderboard persistence
-
-UI Architecture
-Components
-
-Screen-based structure:
-
-Landing Page
-
-Game Screen
-
-Game Over Screen
-
-Leaderboard Screen
-
-Reusable UI components:
-
-TileCard
-
-HandHistory
-
-StatsGrid
-
-Button
-
-Input
-
-Tech Stack
-React 19
-
-Vite
-
-Tailwind CSS
-
-Framer Motion
-
-JavaScript (ES6+)
-
-localStorage for persistence
-
-Development Approach (AI Usage Transparency)
-This project was developed with selective AI assistance to improve development speed and design quality while maintaining full control over architecture and implementation.
-
-AI was used for:
-
-1)UI/UX Design Support
-
-2)Used Stitch AI for layout inspiration and UI structure ideas
-
-3)Debugging and Code  syntax Assistance
-
-4)Helped improve maintainability of game logic modules
-
-Human Responsibility:
-
-1)All core game rules and logic were designed and implemented independently
-
-2)Final architectural decisions were made manually
-
-3)All AI suggestions were reviewed, tested, and validated before integration
-
-Project Structure:
-
-src/
-├── main.jsx
-├── App.jsx
-├── components/
-│   ├── screens/
-│   │   ├── LandingPage.jsx
-│   │   ├── GameScreen.jsx
-│   │   ├── GameOverScreen.jsx
-│   │   └── LeaderboardScreen.jsx
-│   ├── game/
-│   │   ├── TileCard.jsx
-│   │   ├── HandHistory.jsx
-│   │   └── StatsGrid.jsx
-│   ├── ui/
-│   │   ├── Button.jsx
-│   │   └── Input.jsx
-│   └── hooks/
-│       └── useGameState.js
-├── lib/
-│   ├── tiles.js
-│   ├── deck.js
-│   └── scoring.js
-└── assets/
-Testing & Validation
-Verified 34 unique tile generation
-
-Validated honor tile value scaling
-
-Tested betting logic accuracy
-
-Verified reshuffle mechanics
-
-Confirmed leaderboard persistence
-
-Validated game-over conditions
-
-Ensured responsive UI behavior
-
-Build verified with zero errors
-
-Deployment
-bash
-npm install
-npm run dev
-Production build:
-
-bash
-npm run build
-Author
-Jumana Iqbal
-
+All AI-assisted changes were reviewed and manually validated before acceptance.
